@@ -1,0 +1,7 @@
+accelerate==0.14.0
+librosa
+soundfile
+torch==2.4.1
+torchaudio
+typer
+numpy==1.24
