@@ -37,7 +37,7 @@ $ pip install -r requirements.txt
 
 # running
 $ uvicorn web.main:app --reload --host=0.0.0.0 --port=8000
-# localhost:8000/test_mode
-# localhost:8000/split
+# localhost:8000/test_model
 # localhost:8000/output
+# localhost:8000/split
 ```
