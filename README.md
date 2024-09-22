@@ -41,3 +41,9 @@ $ uvicorn web.main:app --reload --host=0.0.0.0 --port=8000
 # localhost:8000/output
 # localhost:8000/split
 ```
+
+## TODOS:
+- [ ] save models output as mp3 format
+- [ ] web mp3 player and redirect to music player (streaming)
+- [ ] uploader form
+- [ ] api route with parameters for using in the app
