@@ -1,13 +1,15 @@
 
 from fastapi import Request, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import torch
 from web.config import settings
-
 import os
 import sys
+import io
+import shutil
 from pathlib import Path
 sys.path.append("..") # for importing modules from parent directory 
 
@@ -19,9 +21,20 @@ model = Splitter.from_pretrained(model_path).to(device).eval()
 
 
 app = FastAPI(title=settings.PROJECT_NAME,version=settings.PROJECT_VERSION)
+origins = [    "http://localhost",
+    "http://localhost:8000",]
 
-app.mount("/output", StaticFiles(directory="output",check_dir=True, html=True), name="output")
-templates = Jinja2Templates(directory="output")
+app.add_middleware(
+  CORSMiddleware,
+  allow_origins=origins,
+  allow_credentials=True,
+  allow_methods=["*"],
+  allow_headers=["*"],
+)
+app.mount("/output/", StaticFiles(directory="output",check_dir=True), name="output")
+app.mount("/streamplayer", StaticFiles(directory="streamplayer"), name="streamplayer")
+#templates = Jinja2Templates(directory="streamplayer")
+
 
 
 @app.get("/output", response_class=HTMLResponse)
@@ -61,7 +74,7 @@ async def split():
 
     import librosa
     import soundfile
-
+    import pydub
 
     sr = 44100
 
@@ -90,10 +103,90 @@ async def split():
         print(f"Writing {fpath_dst}")
         fpath_dst.parent.mkdir(exist_ok=True)
         soundfile.write(fpath_dst, stem.cpu().detach().numpy().T, sr, "PCM_16")
-        # write_wav(fname, np.asfortranarray(stem.squeeze().numpy()), sr)
+        
     response = RedirectResponse(url='/output')
     return response
 
+@app.get("/splitmp3")
+async def splitmp3():
+    input: str = "input/1.mp3"
+    output_dir: str = "output"
+    offset: float = 0
+    duration: float = 30
+    write_src: bool = False
+
+    import librosa
+    import soundfile
+    import pydub
+
+    sr = 44100
+
+    # load wav audio
+    fpath_src = Path(input)
+    wav, _ = librosa.load(
+        fpath_src,
+        mono=False,
+        res_type="kaiser_fast",
+        sr=sr,
+        duration=duration,
+        offset=offset,
+    )
+    wav = torch.Tensor(wav).to(device)
+
+    # normalize audio
+    # wav_torch = wav / (wav.max() + 1e-8)
+
+    with torch.no_grad():
+        stems = model.separate(wav)
+
+    if write_src:
+        stems["input"] = wav
+    import tempfile
+    for name, stem in stems.items():
+        fpath_dst = Path(output_dir) / f"{fpath_src.stem}_{name}.wav"
+        fpath_dst.parent.mkdir(exist_ok=True)
+        #soundfile.write(fpath_dst, stem.cpu().detach().numpy().T, sr, "PCM_16")
+        pydub.AudioSegment.converter = 'c:\\FFmpeg\\bin\\ffmpeg.exe'
+        #audio_segment = pydub.AudioSegment.from_file(fpath_dst)
+        tmp_file = tempfile.NamedTemporaryFile(suffix='.wav')
+        soundfile.write(tmp_file, stem.cpu().detach().numpy().T, sr, "PCM_16")
+        tmp_file.seek(0)  # Reset the file pointer
+        audio_segment = pydub.AudioSegment.from_wav(tmp_file)
+        audio_segment.export(Path(output_dir) / f"{fpath_src.stem}_{name}.mp3", format='mp3')
+        # write_wav(fname, np.asfortranarray(stem.squeeze().numpy()), sr)
+    response = RedirectResponse(url='/streamplayer/index.html?pl=1')
+    return response
+
+
+@app.get("/upload")
+async def main():
+    content = """
+    <body>
+    <form action="/files/" enctype="multipart/form-data" method="post">
+    <input name="files" type="file" multiple>
+    <input type="submit">
+    </form>
+    <form action="/uploadfile/" enctype="multipart/form-data" method="post">
+    <input name="file" type="file" accept="audio/mp3">
+    <input type="submit">
+    </form>
+    </body>
+    """
+    return HTMLResponse(content=content)
+
+
+
+@app.post("/uploadfile/")
+async def upload_file(file: UploadFile = File(...)):
+    upload_folder = "output"
+    global upload_folder
+    #print(file)
+    file_object = file.file
+    #create empty file to copy the file_object to
+    upload_folder = open(os.path.join(upload_folder, file.filename), 'wb+')
+    shutil.copyfileobj(file_object, upload_folder)
+    upload_folder.close()
+    return {"filename": file.filename}
 
 # @app.post("/predict")
 # async def inference(request: Request):

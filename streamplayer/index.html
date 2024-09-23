@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Simple js player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel='stylesheet' href='src/player.css' media='all' />
+    <!-- Monospace font for play and pause buttons-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- OFL font for rest of controls-->
+    <script src="https://code.iconify.design/1/1.0.7/iconify.min.js"></script>
+</head>
+<body>
+    <!-- if JS is not enabled -->
+    <noscript>
+        <div id="nojs_message">
+            <p>In order for this audio player to function, you need to have javascript enabled.</p>
+        </div>
+    </noscript>
+    <!-- main flex container -->
+    <div class="flex_1" id="flex_1">
+        <div class="background">
+            <a target="_blank" href="#" title="A custom link"></a>
+            <div class="player">
+                <audio preload="metadata" id="audio">Your browser lacks javascript support</audio>
+                <p id="artist" title="Current playing">Music</p>
+                <!--<p id="song" title="Current playing">vocals</p>-->
+               
+
+                <div class="controls">
+                    <!-- the rotating loading animation-->
+                    <h4 id="loader">
+                    <!-- wraps the play button and for js to listen to on click -->
+                    <div class="loader"></div>
+                    </h4>
+                    <div class="aroundbutton" alt="Run the stream" id="aroundbutton" title="Start the audio stream">
+                        <a class="playbutton">
+                            <i class="fas fa-play fa-fw on" onclick="" id="on"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="quality" title="Higher quality">
+                    <i class="fa-solid fa-2x fa-microphone-lines"></i>
+                    <!--<span class="iconify" data-icon="si-glyph:button-hd" data-inline="false"
+                          style="line-height: 10px;color: rgb(178 44 37);margin: 0.455em 0.3em;font-size: 29px;display: table-cell;">></span>-->
+                    <input type="checkbox" class="toggle" onclick="check()" id="quality" >
+                </div>
+
+                <!-- volume and quality controls-->
+                <span class="iconify" data-icon="fa:volume-down" data-inline="false"
+                    style="color: #343434;height:14px"></span>
+                <input title="Volume" id="vol-control" type="range" min="0" max="100" step="1" value="100"
+                    oninput="SetVolume(this.value)" onchange="SetVolume(this.value)"/>
+                <span class="iconify" data-icon="fa:volume-up" data-inline="false"
+                    style="color: #343434;height:14px"></span>
+            </div>
+        </div>
+    </div>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const plValue = urlParams.get('pl');
+        let accompanimentUrl = `http://${window.location.host}/output/${plValue}_accompaniment.mp3`;
+        let vocalsUrl = `http://${window.location.host}/output/${plValue}_vocals.mp3`;
+     
+
+
+        // check for which audio quality to load
+        var checkBox = document.getElementById("quality");
+        const radioSource = accompanimentUrl;
+        const resetAudio = "about:blank";
+        const loader = document.getElementById('loader');
+        const audio = document.getElementById('audio');
+
+        // set initial volume var
+        window.SetVolume = function (val) {
+            var player = document.getElementById('audio');
+            player.volume = val / 100;
+        }
+
+        audio.addEventListener('loadstart', () => {
+            if (audio.src !== resetAudio) {
+                loader.style.visibility = "visible";
+            }
+        });
+
+        audio.addEventListener('playing', () => {
+            loader.style.visibility = "hidden";
+        });
+
+        // if cliked the play button start the stream
+        document.getElementById('aroundbutton').addEventListener('click', (evt) => {
+            var element = document.getElementById("on");
+            if (audio.paused) {
+                audio.src = resetAudio;
+                audio.pause();
+                audio.src = radioSource;
+                audio.load();
+                audio.play();
+                element.classList.remove("fa-play");
+                element.classList.add("fa-pause");
+              
+            } else {
+                element.classList.remove("fa-pause");
+                element.classList.add("fa-play");
+                audio.src = resetAudio;
+                audio.pause();
+            }
+        })
+
+        // triggered by clicking quality choice button
+        function check() {
+            if (checkBox.checked) {
+                const radioSource = vocalsUrl;
+                const resetAudio = "about:blank";
+                var element = document.getElementById("on");
+                audio.src = resetAudio;
+                audio.pause();
+                audio.src = radioSource;
+                audio.load();
+                audio.play();
+                element.classList.remove("fa-play");
+                element.classList.add("fa-pause");
+            } else {
+                const radioSource = accompanimentUrl;
+                const resetAudio = "about:blank";
+                var element = document.getElementById("on");
+                audio.src = resetAudio;
+                audio.pause();
+                audio.src = radioSource;
+                audio.load();
+                audio.play();
+                element.classList.remove("fa-play");
+                element.classList.add("fa-pause");
+            }
+        }
+
+        // json parser for current playing song and artist
+        // replace with a more relevant parser if needed
+        function whatIsPlaying() {
+            var url = accompanimentUrl;
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function () {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                    //document.getElementById('songs').innerHTML = JSON.parse(xmlHttp.responseText).song;
+                    //document.getElementById('artist').innerHTML = JSON.parse(xmlHttp.responseText).artist;
+                    //window.document.title = JSON.parse(xmlHttp.responseText).artist + " - " + JSON.parse(xmlHttp.responseText).song + " | Simple player";
+                }
+            }
+            xmlHttp.open("GET", url, true);
+            xmlHttp.send();
+        }
+
+        whatIsPlaying(); // auto refresh currently playing song. Consider drawback of frequent updates
+        //setInterval(whatIsPlaying, 1500);
+
+        document.getElementById('on').addEventListener('click', (evt) => {
+            var element = document.getElementById("on");
+            element.classList.remove("fa-pause");
+            element.classList.add("fa-play");
+        })
+
+
+    </script>
+
+</body>
+
+</html>

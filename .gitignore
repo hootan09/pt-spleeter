@@ -2,3 +2,4 @@ output/
 input/
 myenv/
 __pycache__/
+.vs/
