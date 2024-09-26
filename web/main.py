@@ -107,12 +107,12 @@ async def split():
     response = RedirectResponse(url='/output')
     return response
 
-@app.get("/splitmp3")
-async def splitmp3():
-    input: str = "input/1.mp3"
+@app.get("/splitmp3/{item_name}")
+async def splitmp3(item_name):
+    input: str = "input/"+item_name
     output_dir: str = "output"
     offset: float = 0
-    duration: float = 30
+    duration: float = 600
     write_src: bool = False
 
     import librosa
@@ -154,8 +154,9 @@ async def splitmp3():
         audio_segment = pydub.AudioSegment.from_wav(tmp_file)
         audio_segment.export(Path(output_dir) / f"{fpath_src.stem}_{name}.mp3", format='mp3')
         # write_wav(fname, np.asfortranarray(stem.squeeze().numpy()), sr)
-    response = RedirectResponse(url='/streamplayer/index.html?pl=1')
+    response = RedirectResponse(url='/streamplayer/index.html?pl='+item_name.rsplit('.', 1)[0])
     return response
+
 
 
 @app.get("/upload")
@@ -175,18 +176,7 @@ async def main():
     return HTMLResponse(content=content)
 
 
-
-@app.post("/uploadfile/")
-async def upload_file(file: UploadFile = File(...)):
-    upload_folder = "output"
-    global upload_folder
-    #print(file)
-    file_object = file.file
-    #create empty file to copy the file_object to
-    upload_folder = open(os.path.join(upload_folder, file.filename), 'wb+')
-    shutil.copyfileobj(file_object, upload_folder)
-    upload_folder.close()
-    return {"filename": file.filename}
+#https://github.com/Danny-Dasilva/FastAPI-Hosting/blob/master/main.py
 
 # @app.post("/predict")
 # async def inference(request: Request):
