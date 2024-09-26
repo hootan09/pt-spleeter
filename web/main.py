@@ -111,6 +111,7 @@ async def split():
 async def splitmp3(item_name):
     input: str = "input/"+item_name
     output_dir: str = "output"
+    ffmpeg_dir: str = "localffmpeg/ffmpeg.exe"
     offset: float = 0
     duration: float = 600
     write_src: bool = False
@@ -146,8 +147,10 @@ async def splitmp3(item_name):
         fpath_dst = Path(output_dir) / f"{fpath_src.stem}_{name}.wav"
         fpath_dst.parent.mkdir(exist_ok=True)
         #soundfile.write(fpath_dst, stem.cpu().detach().numpy().T, sr, "PCM_16")
-        pydub.AudioSegment.converter = 'c:\\FFmpeg\\bin\\ffmpeg.exe'
-        #audio_segment = pydub.AudioSegment.from_file(fpath_dst)
+        
+        pydub.AudioSegment.converter = Path(ffmpeg_dir)
+        #pydub.AudioSegment.converter = 'c:\\FFmpeg\\bin\\ffmpeg.exe'
+        
         tmp_file = tempfile.NamedTemporaryFile(suffix='.wav')
         soundfile.write(tmp_file, stem.cpu().detach().numpy().T, sr, "PCM_16")
         tmp_file.seek(0)  # Reset the file pointer
