@@ -104,11 +104,13 @@ async def splitmp3(item_name):
     duration: float = 30
     write_src: bool = False
 
-    import librosa
     from pydub import AudioSegment
     import tempfile
+    import librosa
     import soundfile
-    sr = 44100
+    
+    import time
+    start_time = time.time()
 
     # load wav audio
     fpath_src = Path(input)
@@ -117,9 +119,10 @@ async def splitmp3(item_name):
         mono=False,
         res_type="kaiser_fast",
         sr=settings.SAMPLE_RATE,
-        duration=duration,
-        offset=offset,
+        # duration=duration,
+        # offset=offset,
     )
+
     wav = torch.Tensor(wav).to(device)
 
     with torch.no_grad():
@@ -132,7 +135,7 @@ async def splitmp3(item_name):
         fpath_dst.parent.mkdir(exist_ok=True)
 
         tmp_file = tempfile.NamedTemporaryFile(suffix='.wav')
-        soundfile.write(tmp_file, stem.cpu().detach().numpy().T, sr, "PCM_16")
+        soundfile.write(tmp_file, stem.cpu().detach().numpy().T, settings.SAMPLE_RATE, "PCM_16")
         tmp_file.seek(0)  # Reset the file pointer
 
         audio = AudioSegment.from_wav(tmp_file)
@@ -141,6 +144,10 @@ async def splitmp3(item_name):
         # print("Shape of the converted numpy array:", data.shape , audio.channels, audio.frame_rate)
         audio_segment = AudioSegment(data.tobytes(), frame_rate= settings.SAMPLE_RATE, sample_width=data.dtype.itemsize, channels=audio.channels)
         audio_segment.export(Path(output_dir) / f"{fpath_src.stem}_{name}.mp3", format='mp3')
+
+    execution_time = time.time() - start_time
+    print(f"\n\n\n######### Execution time for : {item_name} is {execution_time:.4f} seconds\n\n\n")
+
     return RedirectResponse(url='/streamplayer/index.html?pl=' + item_name.rsplit('.', 1)[0])
 
 

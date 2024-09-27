@@ -49,5 +49,11 @@ $ uvicorn web.main:app --reload --host=0.0.0.0 --port=8000
     - [ ] slider for seek mp3
 - [ ] uploader form
 - [ ] api route with parameters for using in the app
-- [ ] remove librosa and soundfile (only use audio segment if it possible)
-- [ ] public folder for serving assets and css and etc..
+- [ ] public folder for serving assets and css and etc...
+
+
+```txt
+1.mp3 duration:     3:33:00
+      full split    00:13.7051:00
+      split 30sec   00:3.0017:00
+```
