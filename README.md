@@ -39,11 +39,15 @@ $ pip install -r requirements.txt
 $ uvicorn web.main:app --reload --host=0.0.0.0 --port=8000
 # localhost:8000/test_model
 # localhost:8000/output
-# localhost:8000/split
+# localhost:8000/splitmp3/{item_file}
 ```
 
 ## TODOS:
-- [ ] save models output as mp3 format
-- [ ] web mp3 player and redirect to music player (streaming)
+- [X] save models output as mp3 format (without ffmpeg)
+- [X] web mp3 player and redirect to music player (streaming)
+    - [ ] web mp3 player play both vocal and mp3 same time for switching mode
+    - [ ] slider for seek mp3
 - [ ] uploader form
 - [ ] api route with parameters for using in the app
+- [ ] remove librosa and soundfile (only use audio segment if it possible)
+- [ ] public folder for serving assets and css and etc..

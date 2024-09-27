@@ -1,0 +1,61 @@
+audio = AudioSegment.from_file("input/1.mp3")
+data = np.array(audio.get_array_of_samples())
+data = data.reshape(audio.channels, -1, order='C')
+print("Shape of the converted numpy array:", data.shape , audio.channels, audio.frame_rate)
+audio_segment = AudioSegment(data.tobytes(), frame_rate= sr, sample_width=data.dtype.itemsize, channels=audio.channels)
+audio_segment.export(Path(output_dir) / f"{fpath_src.stem}_{name}1111111.mp3", format='mp3')
+
+
+
+@app.get("/splitmp3/{item_name}")
+async def splitmp3(item_name):
+    input: str = "input/"+item_name
+    output_dir: str = "output"
+    ffmpeg_dir: str = "localffmpeg/ffmpeg.exe"
+    offset: float = 0
+    duration: float = 600
+    write_src: bool = False
+
+    import librosa
+    import soundfile
+    import pydub
+
+    sr = 44100
+
+    # load wav audio
+    fpath_src = Path(input)
+    wav, _ = librosa.load(
+        fpath_src,
+        mono=False,
+        res_type="kaiser_fast",
+        sr=sr,
+        duration=duration,
+        offset=offset,
+    )
+    wav = torch.Tensor(wav).to(device)
+
+    # normalize audio
+    # wav_torch = wav / (wav.max() + 1e-8)
+
+    with torch.no_grad():
+        stems = model.separate(wav)
+
+    if write_src:
+        stems["input"] = wav
+    import tempfile
+    for name, stem in stems.items():
+        fpath_dst = Path(output_dir) / f"{fpath_src.stem}_{name}.wav"
+        fpath_dst.parent.mkdir(exist_ok=True)
+        #soundfile.write(fpath_dst, stem.cpu().detach().numpy().T, sr, "PCM_16")
+        
+        pydub.AudioSegment.converter = Path(ffmpeg_dir)
+        #pydub.AudioSegment.converter = 'c:\\FFmpeg\\bin\\ffmpeg.exe'
+        
+        tmp_file = tempfile.NamedTemporaryFile(suffix='.wav')
+        soundfile.write(tmp_file, stem.cpu().detach().numpy().T, sr, "PCM_16")
+        tmp_file.seek(0)  # Reset the file pointer
+        audio_segment = pydub.AudioSegment.from_wav(tmp_file)
+        audio_segment.export(Path(output_dir) / f"{fpath_src.stem}_{name}.mp3", format='mp3')
+        # write_wav(fname, np.asfortranarray(stem.squeeze().numpy()), sr)
+    response = RedirectResponse(url='/streamplayer/index.html?pl='+item_name.rsplit('.', 1)[0])
+    return response
