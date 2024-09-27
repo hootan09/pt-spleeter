@@ -4,7 +4,7 @@ import { TracksListItem } from '@/components/TracksListItem'
 import TrackPlayer, { Track } from 'react-native-track-player'
 
 import tracks from '@/assets/data/library.json';
-// import unknownTrackImageUri from "../assets/images/unknown_track.png";
+import unknownTrackImageUri from '../assets/images/unknown_track.png';
 
 
 export const TracksList = ({}: any) => {
@@ -17,10 +17,10 @@ export const TracksList = ({}: any) => {
 				<View>
 					<Text style={{}}>No songs found</Text>
 
-					{/* <Image
-						source={{ uri: unknownTrackImageUri }}
+					<Image
+						source={unknownTrackImageUri}
 						style={styles.emptyContentImage}
-					/> */}
+					/>
 				</View>
 			}
 			renderItem={({ item: track }) => (

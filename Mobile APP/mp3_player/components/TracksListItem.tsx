@@ -1,8 +1,7 @@
-// import unknownTrackImageUri from "../assets/images/unknown_track.png";
 import { Entypo, Ionicons } from '@expo/vector-icons'
 import { Image, StyleSheet, Text, TouchableHighlight, View } from 'react-native'
-
 import { Track, useActiveTrack, useIsPlaying } from 'react-native-track-player'
+import unknownTrackImage from "../assets/images/unknown_track.png";
 
 export type TracksListItemProps = {
 	track: Track
@@ -13,6 +12,8 @@ export const TracksListItem = ({
 	track,
 	onTrackSelect: handleTrackSelect,
 }: TracksListItemProps) => {
+
+	const unknownTrackImageUri = Image.resolveAssetSource(unknownTrackImage).uri
 	const { playing } = useIsPlaying()
 
 	const isActiveTrack = useActiveTrack()?.url === track.url
@@ -21,21 +22,18 @@ export const TracksListItem = ({
 		<TouchableHighlight onPress={() => handleTrackSelect(track)}>
 			<View style={styles.trackItemContainer}>
 				<View>
-					{/* <Image
+					<Image
 						source={{
 							uri: track.artwork ?? unknownTrackImageUri,
 						}}
-						style={{
-							...styles.trackArtworkImage,
-							opacity: isActiveTrack ? 0.6 : 1,
-						}}
-					/> */}
+						style={[styles.trackArtworkImage,{opacity: isActiveTrack ? 0.6 : 1,}]}
+					/>
 
 					{isActiveTrack &&
 						(playing ? (
 							<Ionicons
 								style={styles.trackPlayingIconIndicator}
-								name="LineScaleParty"
+								name="settings"
 								size={24}
 								color={"red"}
 							/>
