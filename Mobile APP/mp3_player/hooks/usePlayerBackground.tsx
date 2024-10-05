@@ -13,7 +13,7 @@ export const usePlayerBackground = (imageUrl: string) => {
 			key: imageUrl,
 		}).then((colors: any) => {
             setImageColors(colors as IOSImageColors)
-            console.log(colors);
+            // console.log(colors);
             
         }
         )

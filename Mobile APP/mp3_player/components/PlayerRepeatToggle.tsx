@@ -21,20 +21,24 @@ export const PlayerRepeatToggle = ({ ...iconProps }: IconProps) => {
 		changeRepeatMode(repeatOrder[nextIndex])
 	}
 
-	const icon = 'repeat-off'
-    
-    // match(repeatMode)
-	// 	.returnType<IconName>()
-	// 	.with(RepeatMode.Off, () => 'repeat-off')
-	// 	.with(RepeatMode.Track, () => 'repeat-once')
-	// 	.with(RepeatMode.Queue, () => 'repeat')
-	// 	.otherwise(() => 'repeat-off')
+	const getIconName = ()=>{
+		switch(repeatMode) {
+			case RepeatMode.Off:
+				return 'repeat-off'
+			case RepeatMode.Track:
+				return 'repeat-once'
+			case RepeatMode.Queue:
+				return 'repeat'
+			default:
+				return 'repeat-off';
+		}
+	}
 
 	return (
 		<MaterialCommunityIcons
-			name={icon}
+			name={getIconName()}
 			onPress={toggleRepeatMode}
-			color={'red'}
+			color={'white'}
 			{...iconProps}
 		/>
 	)

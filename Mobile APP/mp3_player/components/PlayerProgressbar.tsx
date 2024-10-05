@@ -1,10 +1,12 @@
+import { Colors } from '@/constants/Colors'
 import { formatSecondsToMinutes } from '../constants/helpers/miscellaneous'
-import { StyleSheet, Text, View, ViewProps } from 'react-native'
+import { StyleSheet, Text, useColorScheme, View, ViewProps } from 'react-native'
 import { Slider } from 'react-native-awesome-slider'
 import { useSharedValue } from 'react-native-reanimated'
 import TrackPlayer, { useProgress } from 'react-native-track-player'
 
 export const PlayerProgressBar = ({ style }: ViewProps) => {
+	const colorScheme = useColorScheme();
 	const { duration, position } = useProgress(250)
 
 	const isSliding = useSharedValue(false)
@@ -29,8 +31,8 @@ export const PlayerProgressBar = ({ style }: ViewProps) => {
 				thumbWidth={0}
 				renderBubble={() => null}
 				theme={{
-					minimumTrackTintColor: 'red',
-					maximumTrackTintColor: 'blue',
+					minimumTrackTintColor: 'white',
+					maximumTrackTintColor: Colors[colorScheme].tint,
 				}}
 				onSlidingStart={() => (isSliding.value = true)}
 				onValueChange={async (value) => {

@@ -1,10 +1,12 @@
+import { Colors } from '@/constants/Colors'
 import { useTrackPlayerVolume } from '@/hooks/useTrackPlayerVolume'
 import { Ionicons } from '@expo/vector-icons'
-import { View, ViewProps } from 'react-native'
+import { useColorScheme, View, ViewProps } from 'react-native'
 import { Slider } from 'react-native-awesome-slider'
 import { useSharedValue } from 'react-native-reanimated'
 
 export const PlayerVolumeBar = ({ style }: ViewProps) => {
+	const colorScheme = useColorScheme();
 	const { volume, updateVolume } = useTrackPlayerVolume()
 
 	const progress = useSharedValue(0)
@@ -16,7 +18,7 @@ export const PlayerVolumeBar = ({ style }: ViewProps) => {
 	return (
 		<View style={style}>
 			<View style={{ flexDirection: 'row', alignItems: 'center' }}>
-				<Ionicons name="volume-low" size={20} color={'red'} style={{ opacity: 0.8 }} />
+				<Ionicons name="volume-low" size={20} color={'white'} style={{ opacity: 0.8 }} />
 
 				<View style={{ flex: 1, flexDirection: 'row', paddingHorizontal: 10 }}>
 					<Slider
@@ -28,8 +30,8 @@ export const PlayerVolumeBar = ({ style }: ViewProps) => {
 						}}
 						renderBubble={() => null}
 						theme={{
-							maximumTrackTintColor: 'red',
-							minimumTrackTintColor: 'blue',
+							maximumTrackTintColor: Colors[colorScheme].tint,
+							minimumTrackTintColor: 'white',
 						}}
 						thumbWidth={0}
 						maximumValue={max}

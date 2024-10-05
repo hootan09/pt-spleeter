@@ -79,7 +79,7 @@ export const TracksListItem = ({
 							{
 								color: Colors[colorScheme].tint,
 							}]}>
-							{track?.artist || 'UKNOWN'}
+							{track?.artist || 'UNKNOWN'}
 						</Text>
 					</View>
 
