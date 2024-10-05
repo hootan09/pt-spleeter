@@ -84,7 +84,7 @@ const PlayerScreen = () => {
 									<View style={styles.trackTitleContainer}>
 										<MovingText
 											text={activeTrack?.title ?? 'UNKNOWN'}
-											animationThreshold={30}
+											animationThreshold={25}
 											style={[styles.trackTitleText, {color: Colors['dark']?.text}]}
 										/>
 									</View>
@@ -106,7 +106,7 @@ const PlayerScreen = () => {
 						<PlayerVolumeBar style={{ marginTop: 'auto', marginBottom: 30 }} />
 
 						<View style={{justifyContent: 'center', alignItems: 'center'}}>
-							<PlayerRepeatToggle size={30} style={{ marginBottom: 6 }} />
+							<PlayerRepeatToggle size={25} style={{ marginBottom: 6 }} />
 						</View>
 					</View>
 				</View>

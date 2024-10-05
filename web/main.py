@@ -102,7 +102,7 @@ async def splitmp3(item_name):
     output_dir: str = "output"
     offset: float = 0
     duration: float = 30
-    write_src: bool = False
+    write_src: bool = True
 
     from pydub import AudioSegment
     import tempfile

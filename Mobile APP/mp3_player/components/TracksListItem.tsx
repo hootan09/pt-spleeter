@@ -38,14 +38,14 @@ export const TracksListItem = ({
 							<Ionicons
 								style={styles.trackPlayingIconIndicator}
 								name="play"
-								size={24}
+								size={20}
 								color={"red"}
 							/>
 						) : (
 							<Ionicons
 								style={styles.trackPausedIndicator}
 								name="pause"
-								size={24}
+								size={20}
 								color={"red"}
 							/>
 						))}
