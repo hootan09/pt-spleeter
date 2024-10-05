@@ -6,7 +6,7 @@ import { MovingText } from '@/components/MovingText'
 // import { unknownTrackImageUri } from '@/constants/images'
 import { FontAwesome } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import { ActivityIndicator, Image, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, useColorScheme, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useActiveTrack } from 'react-native-track-player'
 import { usePlayerBackground } from '@/hooks/usePlayerBackground'
@@ -16,14 +16,19 @@ import { PlayerProgressBar } from '@/components/PlayerProgressbar'
 import { PlayerControls } from '@/components/PlayerControls'
 import { PlayerVolumeBar } from '@/components/PlayerVolumeBar'
 import { PlayerRepeatToggle } from '@/components/PlayerRepeatToggle'
+import { Colors } from '@/constants/Colors'
 
+const {width, height} = Dimensions.get('window');
 
 const PlayerScreen = () => {
+
+	const colorScheme = useColorScheme();
 
 	const activeTrack = useActiveTrack()
 
     const unknownTrackImageUri = Image.resolveAssetSource(unknownTrackImage).uri
 	const { imageColors } = usePlayerBackground(activeTrack?.artwork ?? unknownTrackImageUri)
+	
 
 	const { top, bottom } = useSafeAreaInsets()
 
@@ -32,7 +37,7 @@ const PlayerScreen = () => {
 	if (!activeTrack) {
 		return (
 			<View style={[{ justifyContent: 'center' }]}>
-				<ActivityIndicator color={"red"} />
+				<ActivityIndicator color={Colors[colorScheme].text} />
 			</View>
 		)
 	}
@@ -40,21 +45,24 @@ const PlayerScreen = () => {
 	return (
 		<LinearGradient
 			style={{ flex: 1 }}
-			// colors={imageColors ? [imageColors.background, imageColors.primary] : ["blue"]}
-			colors={['yellow', 'red']}
+			colors={
+				imageColors ? 
+					imageColors.platform == 'ios' ? 
+						[imageColors?.background, imageColors?.primary] 
+						:
+						["blue", "blue"]
+					: 
+					["blue"]}
 		>
 			<View style={styles.overlayContainer}>
-				<DismissPlayerSymbol />
-
-				<View style={{ flex: 1, marginTop: top + 70, marginBottom: bottom }}>
+				<View style={{ flex: 1, marginTop: top, marginBottom: bottom }}>
 					<View style={styles.artworkImageContainer}>
 						<Image
-							source={{uri: activeTrack.artwork ?? unknownTrackImageUri,}}
+							source={{uri: activeTrack.artwork ?? unknownTrackImageUri}}
 							resizeMode="cover"
 							style={styles.artworkImage}
 						/>
 					</View>
-
 					<View style={{ flex: 1 }}>
 						<View style={{ marginTop: 'auto' }}>
 							<View style={{ height: 60 }}>
@@ -73,15 +81,6 @@ const PlayerScreen = () => {
 											style={styles.trackTitleText}
 										/>
 									</View>
-
-									{/* Favorite button icon */}
-									<FontAwesome
-										name={'heart'}
-										size={20}
-										color={'white'}
-										style={{ marginHorizontal: 14 }}
-										onPress={()=>{}}
-									/>
 								</View>
 
 								{/* Track artist */}
@@ -109,38 +108,11 @@ const PlayerScreen = () => {
 	)
 }
 
-const DismissPlayerSymbol = () => {
-	const { top } = useSafeAreaInsets()
-
-	return (
-		<View
-			style={{
-				position: 'absolute',
-				top: top + 8,
-				left: 0,
-				right: 0,
-				flexDirection: 'row',
-				justifyContent: 'center',
-			}}
-		>
-			<View
-				accessible={false}
-				style={{
-					width: 50,
-					height: 8,
-					borderRadius: 8,
-					backgroundColor: '#fff',
-					opacity: 0.7,
-				}}
-			/>
-		</View>
-	)
-}
-
 const styles = StyleSheet.create({
 	overlayContainer: {
 		paddingHorizontal: 5,
 		backgroundColor: 'rgba(0,0,0,0.5)',
+		flex: 1,
 	},
 	artworkImageContainer: {
 		shadowOffset: {
@@ -154,8 +126,8 @@ const styles = StyleSheet.create({
 		height: '45%',
 	},
 	artworkImage: {
-		width: '100%',
-		height: '100%',
+		width: width - width / 5,
+		height: width - width / 5,
 		resizeMode: 'cover',
 		borderRadius: 12,
 	},
