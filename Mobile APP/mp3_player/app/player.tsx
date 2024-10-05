@@ -1,14 +1,9 @@
 import { MovingText } from '@/components/MovingText'
-// import { PlayerControls } from '@/components/PlayerControls'
-// import { PlayerProgressBar } from '@/components/PlayerProgressbar'
-// import { PlayerRepeatToggle } from '@/components/PlayerRepeatToggle'
-// import { PlayerVolumeBar } from '@/components/PlayerVolumeBar'
-// import { unknownTrackImageUri } from '@/constants/images'
-import { FontAwesome, Ionicons } from '@expo/vector-icons'
+import { Ionicons } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
-import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, useColorScheme, View, StatusBar, TouchableOpacity } from 'react-native'
+import { ActivityIndicator, Dimensions, Image, StyleSheet, Text, useColorScheme, View, StatusBar, TouchableOpacity, Switch } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useActiveTrack } from 'react-native-track-player'
+import TrackPlayer, { useActiveTrack, useProgress } from 'react-native-track-player'
 import { usePlayerBackground } from '@/hooks/usePlayerBackground'
 
 import unknownTrackImage from '../assets/images/unknown_track.png';
@@ -18,20 +13,48 @@ import { PlayerVolumeBar } from '@/components/PlayerVolumeBar'
 import { PlayerRepeatToggle } from '@/components/PlayerRepeatToggle'
 import { Colors } from '@/constants/Colors'
 import { router } from 'expo-router'
+import { useState } from 'react'
 
 const { width, height } = Dimensions.get('window');
 
 const PlayerScreen = () => {
-
+	
 	const colorScheme = useColorScheme();
-
 	const activeTrack = useActiveTrack()
 
 	const unknownTrackImageUri = Image.resolveAssetSource(unknownTrackImage).uri
 	const { imageColors } = usePlayerBackground(activeTrack?.artwork ?? unknownTrackImageUri)
-
-
 	const { top, bottom } = useSafeAreaInsets();
+
+	const [isEnabled, setIsEnabled] = useState(false);
+	const {duration, position} = useProgress(250);
+	const toggleSwitch = () => {
+		setIsEnabled(previousState => !previousState);
+		TrackPlayer.stop();
+		const pos = position;
+		if(isEnabled){
+			const originalTrack  =   {
+				"url": "http://192.168.1.4:8000/output/1_input.mp3",
+				"title": "Age Asheghe Mani [320]",
+				"artist": "Naser Pourkaram",
+				"rating": 1,
+				"playlist": ["Chill 🌱"]
+			}
+			TrackPlayer.load(originalTrack);
+		}else{
+			const accompanimentTrack  =   {
+				"url": "http://192.168.1.4:8000/output/1_accompaniment.mp3",
+				"title": "Age Asheghe Mani [320]",
+				"artist": "Naser Pourkaram",
+				"rating": 1,
+				"playlist": ["Chill 🌱"]
+			}
+			TrackPlayer.load(accompanimentTrack)
+		}
+		TrackPlayer.seekTo(pos);
+		TrackPlayer.play()
+	}
+  
 
 	if (!activeTrack) {
 		return (
@@ -70,6 +93,15 @@ const PlayerScreen = () => {
 							style={styles.artworkImage}
 						/>
 					</View>
+					<View style={{justifyContent: 'center', alignItems: 'center', marginTop: 10}}>
+						<Switch
+							trackColor={{false: 'white', true: Colors.dark.backgroundColor}}
+							thumbColor={isEnabled ? Colors.dark.subText : Colors.dark.subText}
+							ios_backgroundColor="#3e3e3e"
+							onValueChange={toggleSwitch}
+							value={isEnabled}
+						/>
+					</View>
 					<View style={{ flex: 1 }}>
 						<View style={{ marginTop: 'auto' }}>
 							<View style={{ height: 60 }}>
@@ -84,7 +116,7 @@ const PlayerScreen = () => {
 									<View style={styles.trackTitleContainer}>
 										<MovingText
 											text={activeTrack?.title ?? 'UNKNOWN'}
-											animationThreshold={25}
+											animationThreshold={20}
 											style={[styles.trackTitleText, {color: Colors['dark']?.text}]}
 										/>
 									</View>

@@ -106,7 +106,7 @@
     "playlist": ["Chill 🌱"]
   },
   {
-    "url": "http://192.168.1.4:8000/output/1_accompaniment.mp3",
+    "url": "http://192.168.1.4:8000/output/1_input.mp3",
     "title": "Age Asheghe Mani [320]",
     "artist": "Naser Pourkaram",
     "rating": 1,
